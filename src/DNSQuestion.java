@@ -5,9 +5,11 @@ import java.util.Objects;
 
 public class DNSQuestion {
 
-    private final String QName;
-    private final int QType;
-    private final int QClass;
+    //After Header we got Question format and filed are QName, QType, QClass
+    // decode example.come
+    private final String QName; // domain name www.example.com
+    private final int QType; // what kind of record is being requested A-AAAA
+    private final int QClass; // IN (Internet)
 
     private DNSQuestion(String QName, int QType, int QClass) {
         this.QName = QName;
@@ -19,7 +21,7 @@ public class DNSQuestion {
     public int getQType() { return QType; }
     public int getQClass() { return QClass; }
 
-    // NEW: decode that supports compression pointers using the full message bytes
+    // decode that supports compression pointers using the full message bytes
     public static DNSQuestion decodeQuestion(InputStream in, byte[] fullMessage) throws IOException {
         String qname = readName(in, fullMessage);
         int qType = readU16(in);
@@ -32,6 +34,7 @@ public class DNSQuestion {
         throw new IOException("Use decodeQuestion(in, fullMessage) so compression works.");
     }
 
+    // we want to jump 12 bytes and read from there.
     private static String readName(InputStream in, byte[] fullMessage) throws IOException {
         StringBuilder sb = new StringBuilder();
         int jumps = 0;
@@ -42,19 +45,24 @@ public class DNSQuestion {
             if (b == 0) break;
 
             // pointer: 11xxxxxx
+            // compare with 11 if yes compression pointer not bale length
             if ((b & 0xC0) == 0xC0) {
                 int b2 = readU8(in);
+                // read the rest of name from offset
                 int offset = ((b & 0x3F) << 8) | b2;
 
+                // check of loop jump
                 if (++jumps > 20) throw new IOException("Too many compression jumps (possible loop)");
 
                 String suffix = readNameFromOffset(offset, fullMessage);
 
+                // add logic for . in www.example.com
                 if (sb.length() > 0 && suffix.length() > 0) sb.append('.');
                 sb.append(suffix);
                 break; // pointer ends the name
             }
 
+            // ready full characters
             int len = b;
             byte[] label = new byte[len];
             readFully(in, label);

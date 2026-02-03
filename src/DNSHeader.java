@@ -2,6 +2,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class DNSHeader {
+
+    // Declare header fields
     private final int id;
     private final int flags;
     private final int questionCount;
@@ -9,9 +11,7 @@ public class DNSHeader {
     private final int authorityCount;
     private final int additionalRecordCount;
 
-
-
-
+    // constructor initialize header fields
     public DNSHeader(
             int id,
             int flags,
@@ -28,6 +28,10 @@ public class DNSHeader {
     }
 
 
+    /**
+     * Decode header fields to make DNS paket in text for server to make decisions
+     * @param in read byte
+     * */
     public static DNSHeader decodeHeader(InputStream in) throws IOException {
         // declared variables we want to decode (split bytes)
         int id = readFirst16Bits(in);
@@ -48,6 +52,8 @@ public class DNSHeader {
                 );
     }
 
+
+    // read each byte and then combine them together
     private static int readFirst16Bits(InputStream in) throws IOException {
         int high = in.read();
         int low  = in.read();

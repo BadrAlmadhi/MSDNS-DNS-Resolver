@@ -2,25 +2,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * DNSRecord = one resource record (answer/authority/additional)
- *
- * In a DNS response, each record is laid out like this:
- *
- *   NAME      (domain name; often compressed)
- *   TYPE      (2 bytes)
- *   CLASS     (2 bytes)
- *   TTL       (4 bytes)
- *   RDLENGTH  (2 bytes)
- *   RDATA     (RDLENGTH bytes)
- *
- * The “hard” part is NAME, because responses often use compression pointers:
- *   If the first two bits are 11 (0xC0), then the next 14 bits are an OFFSET
- *   into the full message where the domain name already appears.
- */
+
 public class DNSRecord {
 
-    // The owner name for this record (e.g., "example.com")
+    // The owner name for this record ("example.com")
     public final String name;
 
     // Record type: 1=A, 28=AAAA, 5=CNAME, etc.
